@@ -102,7 +102,8 @@ def main():
 		fov = cam.GetCamera().GetFov()
 
 		# mouse
-		mouse = hg.Mouse()
+		# mouse = hg.Mouse()
+		keyboard = hg.Keyboard('raw')
 
 		hg.HideCursor()
 
@@ -118,26 +119,55 @@ def main():
 				pipeline_aaa_config.temporal_aa_weight = 0.05
 				pipeline_aaa_config.sample_count = 2
 			# end
-			pipeline_aaa_config.z_thickness = 4.0 # in meters
+			pipeline_aaa_config.z_thickness = 1.0 # in meters
 			pipeline_aaa_config.bloom_bias = 0.00999
-			pipeline_aaa_config.bloom_intensity	= 2.19
+			pipeline_aaa_config.bloom_intensity	= 1.0
 			pipeline_aaa_config.bloom_threshold	= 4.25 * 3.0
 		# end
 
 		# Demo loop ###################################################
 		frame = 0
-		
-		while not hg.ReadKeyboard().Key(hg.K_Escape) & hg.IsWindowOpen(win):			
-			mouse.Update()
+
+		smila = {"node": scene.GetNode("smila"), "trs": None, "pos": None, "rot": None}
+		smila["trs"] = smila["node"].GetTransform()
+		smila["pos"] = smila["trs"].GetPos()
+		smila["rot"] = smila["trs"].GetRot()
+		rotation_speed = hg.DegreeToRadian(10.0)
+
+		smila["anims"] = {}
+		for anim_name in ["idle", "walk", "run", "die"]:
+			smila["anims"][anim_name] = smila["node"].GetInstanceSceneAnim(anim_name)
+		scene.PlayAnim(smila["anims"]["die"], hg.ALM_Loop)
+
+		while not hg.ReadKeyboard().Key(hg.K_Escape) & hg.IsWindowOpen(win):
+			keyboard.Update()
 			
 			lines = []
+			lines.append({"pos_a": hg.Vec3(0,-10,0), "pos_b": hg.Vec3(0,10,0), "color": hg.Color.White})
 			dt = min(hg.time_from_sec_f(5.0/60.0), hg.TickClock())
 			dts = hg.time_to_sec_f(dt)
 			# clock = clock + dt
 
-			# hg.SceneUpdateSystems(scene, scene_clocks, dt, physics, hg.time_from_sec_f(1 / 60), 4)
-			# physics.SyncTransformsToScene(scene)
-			scene.Update(dt)
+			# hero control
+			if keyboard.Down(hg.K_Left):
+				smila["rot"].y += dts * rotation_speed * 20.0
+			elif keyboard.Down(hg.K_Right):
+				smila["rot"].y -= dts * rotation_speed * 20.0
+
+			forward = hg.GetColumn(smila["trs"].GetWorld(), 0)
+			forward = hg.Vec3(forward.x, forward.y, forward.z)
+			forward = hg.Normalize(forward)
+			lines.append({"pos_a": smila["pos"] + hg.Vec3(0,1,0), "pos_b": smila["pos"] + forward * 5.0 + hg.Vec3(0,1,0), "color": hg.Color.Red})
+
+			if keyboard.Down(hg.K_Up):
+				smila["pos"] += forward * dts
+			
+			smila["trs"].SetPos(smila["pos"])
+			smila["trs"].SetRot(smila["rot"])
+
+			hg.SceneUpdateSystems(scene, scene_clocks, dt, physics, hg.time_from_sec_f(1 / 60), 4)
+			physics.SyncTransformsToScene(scene)
+			# scene.Update(dt)
 
 			# main framebuffer
 			view_id = 0
