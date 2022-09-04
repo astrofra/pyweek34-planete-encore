@@ -1,3 +1,6 @@
+# PyWeek 34 -- September 2022
+# P L A N E T E   E N C O R E
+
 import harfang as hg
 from utils import *
 from config_gui import *
@@ -134,6 +137,7 @@ def main():
 		smila["rot"] = smila["trs"].GetRot()
 		rotation_speed = hg.DegreeToRadian(10.0)
 		walk_speed = 1.5
+		run_speed = walk_speed * 2.5
 
 		smila["anims"] = {}
 		for anim_name in ["idle", "walk", "run", "die"]:
@@ -172,7 +176,7 @@ def main():
 
 			if keyboard.Down(hg.K_Up):
 				if keyboard.Down(hg.K_LShift):
-					smila["pos"] += forward * dts * walk_speed * 2.0
+					smila["pos"] += forward * dts * run_speed
 					current_anim_mode = "run"					
 				else:
 					smila["pos"] += forward * dts * walk_speed
