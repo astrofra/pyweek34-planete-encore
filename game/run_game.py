@@ -133,11 +133,16 @@ def main():
 		smila["pos"] = smila["trs"].GetPos()
 		smila["rot"] = smila["trs"].GetRot()
 		rotation_speed = hg.DegreeToRadian(10.0)
+		walk_speed = 1.5
 
 		smila["anims"] = {}
 		for anim_name in ["idle", "walk", "run", "die"]:
 			smila["anims"][anim_name] = smila["node"].GetInstanceSceneAnim(anim_name)
-		scene.PlayAnim(smila["anims"]["die"], hg.ALM_Loop)
+		# scene.PlayAnim(smila["anims"]["die"], hg.ALM_Loop)
+
+		current_anim_mode = "idle"
+		current_anim_ref = None
+		prev_anim_mode = None
 
 		while not hg.ReadKeyboard().Key(hg.K_Escape) & hg.IsWindowOpen(win):
 			keyboard.Update()
@@ -149,6 +154,12 @@ def main():
 			# clock = clock + dt
 
 			# hero control
+			if current_anim_mode != prev_anim_mode:
+				if current_anim_ref is not None:
+					scene.StopAnim(current_anim_ref)
+				current_anim_ref = scene.PlayAnim(smila["anims"][current_anim_mode], hg.ALM_Loop)
+				prev_anim_mode = current_anim_mode
+
 			if keyboard.Down(hg.K_Left):
 				smila["rot"].y += dts * rotation_speed * 20.0
 			elif keyboard.Down(hg.K_Right):
@@ -160,7 +171,14 @@ def main():
 			lines.append({"pos_a": smila["pos"] + hg.Vec3(0,1,0), "pos_b": smila["pos"] + forward * 5.0 + hg.Vec3(0,1,0), "color": hg.Color.Red})
 
 			if keyboard.Down(hg.K_Up):
-				smila["pos"] += forward * dts
+				if keyboard.Down(hg.K_LShift):
+					smila["pos"] += forward * dts * walk_speed * 2.0
+					current_anim_mode = "run"					
+				else:
+					smila["pos"] += forward * dts * walk_speed
+					current_anim_mode = "walk"
+			else:
+				current_anim_mode = "idle"
 			
 			smila["trs"].SetPos(smila["pos"])
 			smila["trs"].SetRot(smila["rot"])

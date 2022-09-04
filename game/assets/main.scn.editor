@@ -8,14 +8,7 @@
 		},
 		"explorer": {
 			"node_custom_order": {
-				"refs": [
-					{
-						"children": [
-							79
-						],
-						"ref": 7
-					}
-				],
+				"refs": null,
 				"roots": [
 					0,
 					1,
@@ -24,7 +17,8 @@
 					4,
 					5,
 					6,
-					7
+					7,
+					8
 				]
 			},
 			"node_sort_method": "custom",
