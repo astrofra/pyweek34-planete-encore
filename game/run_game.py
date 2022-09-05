@@ -4,6 +4,7 @@
 import harfang as hg
 from utils import *
 from config_gui import *
+from hud import display_hud
 from math import pi, sin
 
 def draw_line(pos_a, pos_b, line_color, vid, vtx_line_layout, line_shader):
@@ -46,7 +47,7 @@ def main():
 		# Demo start
 		# res_x, res_y = resolution_multiplier(res_x, res_x, 0.8)
 		res_vec2 = hg.Vec2(res_x, res_y)
-		font_size = int((40 * res_x) / 1280)
+		font_size = int((60 * res_x) / 1280)
 
 		# win = hg.RenderInit('Minisub Escape', res_x, res_y, hg.RF_VSync | hg.RF_MSAA4X)
 		win = hg.NewWindow("Planete Encore", res_x, res_y, 32, default_fullscreen) #, hg.WV_Fullscreen)
@@ -90,7 +91,7 @@ def main():
 
 		# text rendering
 		# load font and shader program
-		font = hg.LoadFontFromAssets('fonts/Hogfish.otf', font_size)
+		font = hg.LoadFontFromAssets('fonts/zector.ttf', font_size)
 		font_program  = hg.LoadProgramFromAssets('core/shader/font')
 
 		# text uniforms and render state
@@ -209,6 +210,7 @@ def main():
 			hg.SetView2D(view_id, 0, 0, res_x, res_y, -1, 1, hg.CF_None, hg.Color.Black, 1, 0)
 
 			# view_id, scroll_x, char_offset, ns = update_demo_scroll_text(dt, view_id, res_x, res_y, scroll_x, char_offset, ns, scroll_text, font, font_program, font_size, text_render_state, EaseInOutQuick(fade))
+			view_id = display_hud(dt, view_id, res_x, res_y, "Score : 12300", font, font_program, font_size, text_render_state, 1.0)
 
 			# Debug physics display
 			if False:
