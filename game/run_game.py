@@ -100,6 +100,7 @@ def main():
 
 		# Set render camera
 		cam = scene.GetNode("Camera")
+		cam_trs = cam.GetTransform()
 		scene.SetCurrentCamera(cam)
 		z_near = cam.GetCamera().GetZNear()
 		z_far = cam.GetCamera().GetZFar()
@@ -129,16 +130,20 @@ def main():
 			pipeline_aaa_config.bloom_threshold	= 4.25 * 3.0
 		# end
 
-		# Demo loop ###################################################
+		# Game loop ###################################################
 		frame = 0
 
-		smila = {"node": scene.GetNode("smila"), "trs": None, "pos": None, "rot": None}
+		smila = {"node": scene.GetNode("smila"), "trs": None, "pos": None, "rot": None, "cam_target": None}
 		smila["trs"] = smila["node"].GetTransform()
 		smila["pos"] = smila["trs"].GetPos()
 		smila["rot"] = smila["trs"].GetRot()
+		cam_offset = cam_trs.GetPos() - smila["pos"]
+		smila["cam_target"] = smila["pos"] + cam_offset
 		rotation_speed = hg.DegreeToRadian(10.0)
 		walk_speed = 1.5
 		run_speed = walk_speed * 2.5
+
+		score = 0
 
 		smila["anims"] = {}
 		for anim_name in ["idle", "walk", "run", "die"]:
@@ -157,6 +162,8 @@ def main():
 			dt = min(hg.time_from_sec_f(5.0/60.0), hg.TickClock())
 			dts = hg.time_to_sec_f(dt)
 			# clock = clock + dt
+
+			score = score + 1
 
 			# hero control
 			if current_anim_mode != prev_anim_mode:
@@ -188,6 +195,12 @@ def main():
 			smila["trs"].SetPos(smila["pos"])
 			smila["trs"].SetRot(smila["rot"])
 
+			# camera pursuit
+			cam_target = smila["pos"] + cam_offset
+			dt_cam = (cam_target - cam_trs.GetPos()) * dts * 10.0
+			smila["cam_target"] += dt_cam
+			cam_trs.SetPos(smila["cam_target"])
+
 			hg.SceneUpdateSystems(scene, scene_clocks, dt, physics, hg.time_from_sec_f(1 / 60), 4)
 			physics.SyncTransformsToScene(scene)
 			# scene.Update(dt)
@@ -210,7 +223,7 @@ def main():
 			hg.SetView2D(view_id, 0, 0, res_x, res_y, -1, 1, hg.CF_None, hg.Color.Black, 1, 0)
 
 			# view_id, scroll_x, char_offset, ns = update_demo_scroll_text(dt, view_id, res_x, res_y, scroll_x, char_offset, ns, scroll_text, font, font_program, font_size, text_render_state, EaseInOutQuick(fade))
-			view_id = display_hud(dt, view_id, res_x, res_y, "Score : 12300", font, font_program, font_size, text_render_state, 1.0)
+			view_id = display_hud(dt, view_id, res_x, res_y, "Score : " + str(score), font, font_program, font_size, text_render_state, 1.0)
 
 			# Debug physics display
 			if False:

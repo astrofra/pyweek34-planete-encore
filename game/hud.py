@@ -7,7 +7,7 @@ def display_hud(dt, view_id, res_x, res_y, text, font, font_program, font_size, 
 	
 	# text_pos = hg.Vec3(0.0, 0.0, 0.0)
 	r = hg.ComputeTextRect(font, text)
-	text_pos = hg.Vec3((-(16 * res_x) / 1280) + r.ex, res_y - (font_size * 1.25), 0)
+	text_pos = hg.Vec3((res_x - (r.ex - r.sx)) / 2, res_y - (font_size * 1.25), 0)
 
 	bold_radius = (2.0 * res_x) / 1280
 	# for l in range(0, int(bold_radius), 2):

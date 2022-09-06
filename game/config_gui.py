@@ -20,8 +20,8 @@ def config_gui():
     pressed_low_aaa = False
     pressed_no_aaa = False
 
-    full_aaa = True
-    low_aaa = False
+    full_aaa = False
+    low_aaa = True
     no_aaa = False
 
     config_done = 0 # 0 = stay, 1 = play demo, 2 = exit without playing the demo
