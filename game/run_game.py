@@ -6,12 +6,58 @@ from utils import *
 from config_gui import *
 from hud import display_hud
 from math import pi, sin
+from statistics import median, mean
 
 def draw_line(pos_a, pos_b, line_color, vid, vtx_line_layout, line_shader):
 	vtx = hg.Vertices(vtx_line_layout, 2)
 	vtx.Begin(0).SetPos(pos_a).SetColor0(line_color).End()
 	vtx.Begin(1).SetPos(pos_b).SetColor0(line_color).End()
 	hg.DrawLines(vid, vtx, line_shader)
+
+
+def CreatePhysicCapsuleEx(scene, radius, height, mtx, model_ref, materials, rb_type=hg.RBT_Dynamic, mass=0.0):
+	if model_ref is not None:
+		node = hg.CreateObject(scene, mtx, model_ref, materials)
+	else:
+		node = scene.CreateNode()
+		t = scene.CreateTransform()
+		t.SetWorld(mtx)
+		node.SetTransform(t)
+	node.SetName("Physic Capsule")
+	rb = scene.CreateRigidBody()
+	rb.SetType(rb_type)
+	node.SetRigidBody(rb)
+    # create custom capsule collision
+	col = scene.CreateCollision()
+	col.SetType(hg.CT_Capsule)
+	col.SetRadius(radius)
+	col.SetHeight(height)
+	col.SetMass(mass)
+    # set capsule as collision shape
+	node.SetCollision(0, col)
+	return node, rb
+
+
+def CreatePhysicCubeEx(scene, size, mtx, model_ref, materials, rb_type=hg.RBT_Dynamic, mass=0.0):
+	if model_ref is not None:
+		node = hg.CreateObject(scene, mtx, model_ref, materials)
+	else:
+		node = scene.CreateNode()
+		t = scene.CreateTransform()
+		t.SetWorld(mtx)
+		node.SetTransform(t)
+	node.SetName("Physic Cube")
+	rb = scene.CreateRigidBody()
+	rb.SetType(rb_type)
+	node.SetRigidBody(rb)
+    # create custom cube collision
+	col = scene.CreateCollision()
+	col.SetType(hg.CT_Cube)
+	col.SetSize(size)
+	col.SetMass(mass)
+    # set cube as collision shape
+	node.SetCollision(0, col)
+	return node, rb
 
 
 def main():
@@ -85,9 +131,9 @@ def main():
 		# shader to draw some 3D lines
 		vtx_line_layout = hg.VertexLayoutPosFloatColorUInt8()
 		shader_for_line = hg.LoadProgramFromAssets("shaders/pos_rgb")
-		shader_for_particle = hg.LoadProgramFromAssets("shaders/dirt_particle")
-		dirt_particle_texture,_ = hg.LoadTextureFromAssets("maps/dirt_particle.png", 
-										hg.TF_UBorder | hg.TF_VBorder | hg.TF_SamplerMinAnisotropic | hg.TF_SamplerMagAnisotropic)
+		# shader_for_particle = hg.LoadProgramFromAssets("shaders/dirt_particle")
+		# dirt_particle_texture,_ = hg.LoadTextureFromAssets("maps/dirt_particle.png", 
+		# 								hg.TF_UBorder | hg.TF_VBorder | hg.TF_SamplerMinAnisotropic | hg.TF_SamplerMagAnisotropic)
 
 		# text rendering
 		# load font and shader program
@@ -133,6 +179,8 @@ def main():
 		# Game loop ###################################################
 		frame = 0
 
+		# smila_physics, smila_rb = CreatePhysicCubeEx(scene, hg.Vec3(1, 1, 1), hg.TransformationMat4(hg.Vec3(0,1.0,0), hg.Vec3(0,0,0)), None, {}, hg.RBT_Dynamic, 5.0)
+
 		smila = {"node": scene.GetNode("smila"), "trs": None, "pos": None, "rot": None, "cam_target": None}
 		smila["trs"] = smila["node"].GetTransform()
 		smila["pos"] = smila["trs"].GetPos()
@@ -142,6 +190,18 @@ def main():
 		rotation_speed = hg.DegreeToRadian(10.0)
 		walk_speed = 1.5
 		run_speed = walk_speed * 2.5
+
+		floor, rb_floor = CreatePhysicCubeEx(scene, hg.Vec3(100, 1, 100), hg.TranslationMat4(hg.Vec3(0, -0.5, 0)), None, {}, hg.RBT_Static, 0.0)
+		smila_physics, smila_rb = CreatePhysicCapsuleEx(scene, 0.5, 1.5/2.0, hg.TransformationMat4(smila["pos"] + hg.Vec3(0,1.5/2.0,0), hg.Vec3(0,0,0)), None, {}, hg.RBT_Dynamic, 5.0)
+		smila_rb.SetFriction(0.0)
+		smila_rb.SetLinearDamping(0.995)
+		smila_rb.SetAngularDamping(0.995)
+		physics.SceneCreatePhysicsFromAssets(scene)
+		physics.NodeSetLinearFactor(smila_physics, hg.Vec3(1.0, 0.0, 1.0))
+		physics.NodeSetAngularFactor(smila_physics, hg.Vec3(0.0, 1.0, 0.0))
+
+		smila["trs"].SetPos(hg.Vec3(0,-1.5/2.0,0))
+		smila["trs"].SetParent(smila_physics)
 
 		score = 0
 
@@ -154,13 +214,19 @@ def main():
 		current_anim_ref = None
 		prev_anim_mode = None
 
+		dt_history_size = 60
+		dt_history = [1/60] * dt_history_size
+
 		while not hg.ReadKeyboard().Key(hg.K_Escape) & hg.IsWindowOpen(win):
 			keyboard.Update()
 			
 			lines = []
 			lines.append({"pos_a": hg.Vec3(0,-10,0), "pos_b": hg.Vec3(0,10,0), "color": hg.Color.White})
-			dt = min(hg.time_from_sec_f(5.0/60.0), hg.TickClock())
-			dts = hg.time_to_sec_f(dt)
+			
+			dt_history.append(hg.time_to_sec_f(hg.TickClock()))
+			dt_history = dt_history[1:]
+			dts =  int(mean(dt_history) * 10000) / 10000.0
+			dt = hg.time_from_sec_f(dts)
 			# clock = clock + dt
 
 			score = score + 1
@@ -172,36 +238,57 @@ def main():
 				current_anim_ref = scene.PlayAnim(smila["anims"][current_anim_mode], hg.ALM_Loop)
 				prev_anim_mode = current_anim_mode
 
-			if keyboard.Down(hg.K_Left):
-				smila["rot"].y += dts * rotation_speed * 20.0
-			elif keyboard.Down(hg.K_Right):
-				smila["rot"].y -= dts * rotation_speed * 20.0
-
-			forward = hg.GetColumn(smila["trs"].GetWorld(), 0)
+			forward = hg.GetColumn(smila_physics.GetTransform().GetWorld(), 0)
 			forward = hg.Vec3(forward.x, forward.y, forward.z)
 			forward = hg.Normalize(forward)
 			lines.append({"pos_a": smila["pos"] + hg.Vec3(0,1,0), "pos_b": smila["pos"] + forward * 5.0 + hg.Vec3(0,1,0), "color": hg.Color.Red})
 
+			physics.NodeWake(smila_physics)
+
 			if keyboard.Down(hg.K_Up):
 				if keyboard.Down(hg.K_LShift):
-					smila["pos"] += forward * dts * run_speed
-					current_anim_mode = "run"					
+					physics.NodeAddForce(smila_physics, forward * 5.0 * 10.0 * 1.5)
+					current_anim_mode = "run"
 				else:
-					smila["pos"] += forward * dts * walk_speed
+					physics.NodeAddForce(smila_physics, forward * 5.0 * 10.0)
 					current_anim_mode = "walk"
 			else:
 				current_anim_mode = "idle"
-			
-			smila["trs"].SetPos(smila["pos"])
-			smila["trs"].SetRot(smila["rot"])
+
+			if keyboard.Down(hg.K_Left):
+				physics.NodeAddTorque(smila_physics, hg.Vec3(0, pi * -10.0, 0))
+			elif keyboard.Down(hg.K_Right):
+				physics.NodeAddTorque(smila_physics, hg.Vec3(0, pi * 10.0, 0))
 
 			# camera pursuit
-			cam_target = smila["pos"] + cam_offset
+			cam_target = hg.GetTranslation(smila["trs"].GetWorld()) + cam_offset
 			dt_cam = (cam_target - cam_trs.GetPos()) * dts * 10.0
 			smila["cam_target"] += dt_cam
 			cam_trs.SetPos(smila["cam_target"])
 
-			hg.SceneUpdateSystems(scene, scene_clocks, dt, physics, hg.time_from_sec_f(1 / 60), 4)
+			# if keyboard.Down(hg.K_Left):
+			# 	smila["rot"].y += dts * rotation_speed * 20.0
+			# elif keyboard.Down(hg.K_Right):
+			# 	smila["rot"].y -= dts * rotation_speed * 20.0
+
+			# forward = hg.GetColumn(smila["trs"].GetWorld(), 0)
+			# forward = hg.Vec3(forward.x, forward.y, forward.z)
+			# forward = hg.Normalize(forward)
+
+			# if keyboard.Down(hg.K_Up):
+			# 	if keyboard.Down(hg.K_LShift):
+			# 		smila["pos"] += forward * dts * run_speed
+			# 		current_anim_mode = "run"					
+			# 	else:
+			# 		smila["pos"] += forward * dts * walk_speed
+			# 		current_anim_mode = "walk"
+			# else:
+			# 	current_anim_mode = "idle"
+			
+			# smila["trs"].SetPos(smila["pos"])
+			# smila["trs"].SetRot(smila["rot"])
+
+			hg.SceneUpdateSystems(scene, scene_clocks, dt, physics, dt, 4)
 			physics.SyncTransformsToScene(scene)
 			# scene.Update(dt)
 
@@ -223,14 +310,15 @@ def main():
 			hg.SetView2D(view_id, 0, 0, res_x, res_y, -1, 1, hg.CF_None, hg.Color.Black, 1, 0)
 
 			# view_id, scroll_x, char_offset, ns = update_demo_scroll_text(dt, view_id, res_x, res_y, scroll_x, char_offset, ns, scroll_text, font, font_program, font_size, text_render_state, EaseInOutQuick(fade))
-			view_id = display_hud(dt, view_id, res_x, res_y, "Score : " + str(score), font, font_program, font_size, text_render_state, 1.0)
+			# view_id = display_hud(dt, view_id, res_x, res_y, "Score : " + str(score), font, font_program, font_size, text_render_state, 1.0)
+			view_id = display_hud(dt, view_id, res_x, res_y, "Dts : " + str(dts), font, font_program, font_size, text_render_state, 1.0)
 
 			# Debug physics display
 			if False:
 				view_id = view_id + 1
 				hg.SetViewClear(view_id, 0, 0, 1.0, 0)
 				hg.SetViewRect(view_id, 0, 0, res_x, res_y)
-				cam_mat = cam.GetTransform().GetWorld()
+				cam_mat = cam_trs.GetWorld()
 				view_matrix = hg.InverseFast(cam_mat)
 				c = cam.GetCamera()
 				projection_matrix = hg.ComputePerspectiveProjectionMatrix(c.GetZNear(), c.GetZFar(), hg.FovToZoomFactor(c.GetFov()), hg.Vec2(res_x / res_y, 1))

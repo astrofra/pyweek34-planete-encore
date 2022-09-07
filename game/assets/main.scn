@@ -20,6 +20,88 @@
 			255
 		]
 	},
+	"collisions": [
+		{
+			"mass": 1.0,
+			"path": "",
+			"pos": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"rot": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"scl": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"type": "cube"
+		},
+		{
+			"mass": 1.0,
+			"path": "",
+			"pos": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"rot": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"scl": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"type": "cube"
+		},
+		{
+			"mass": 1.0,
+			"path": "",
+			"pos": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"rot": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"scl": [
+				1.0,
+				1.0,
+				1.0
+			],
+			"type": "cube"
+		},
+		{
+			"mass": 1.0,
+			"path": "",
+			"pos": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"rot": [
+				0.0,
+				0.0,
+				0.0
+			],
+			"scl": [
+				0.5,
+				1.0,
+				1.0
+			],
+			"type": "sphere"
+		}
+	],
 	"environment": {
 		"ambient": [
 			0,
@@ -151,36 +233,51 @@
 			"name": "Light"
 		},
 		{
+			"collisions": [
+				{
+					"idx": 1
+				}
+			],
 			"components": [
 				2,
 				4294967295,
 				1,
 				4294967295,
-				4294967295
+				1
 			],
 			"disabled": false,
 			"idx": 2,
 			"name": "cube"
 		},
 		{
+			"collisions": [
+				{
+					"idx": 0
+				}
+			],
 			"components": [
 				3,
 				4294967295,
 				2,
 				4294967295,
-				4294967295
+				0
 			],
 			"disabled": false,
 			"idx": 3,
 			"name": "cube"
 		},
 		{
+			"collisions": [
+				{
+					"idx": 2
+				}
+			],
 			"components": [
 				4,
 				4294967295,
 				3,
 				4294967295,
-				4294967295
+				2
 			],
 			"disabled": false,
 			"idx": 4,
@@ -199,12 +296,17 @@
 			"name": "Camera"
 		},
 		{
+			"collisions": [
+				{
+					"idx": 3
+				}
+			],
 			"components": [
 				6,
 				4294967295,
 				4,
 				4294967295,
-				4294967295
+				3
 			],
 			"disabled": false,
 			"idx": 6,
@@ -613,6 +715,40 @@
 			"name": "primitives/sphere.geo"
 		}
 	],
+	"rigid_bodies": [
+		{
+			"angular_damping": 0.0,
+			"friction": 0.49803924560546875,
+			"linear_damping": 0.0,
+			"restitution": 0.0,
+			"rolling_friction": 0.0,
+			"type": "dynamic"
+		},
+		{
+			"angular_damping": 0.0,
+			"friction": 0.49803924560546875,
+			"linear_damping": 0.0,
+			"restitution": 0.0,
+			"rolling_friction": 0.0,
+			"type": "dynamic"
+		},
+		{
+			"angular_damping": 0.0,
+			"friction": 0.49803924560546875,
+			"linear_damping": 0.0,
+			"restitution": 0.0,
+			"rolling_friction": 0.0,
+			"type": "dynamic"
+		},
+		{
+			"angular_damping": 0.0,
+			"friction": 0.49803924560546875,
+			"linear_damping": 0.0,
+			"restitution": 0.0,
+			"rolling_friction": 0.0,
+			"type": "dynamic"
+		}
+	],
 	"transforms": [
 		{
 			"parent": null,
@@ -713,7 +849,7 @@
 			],
 			"rot": [
 				20.056474685668945,
-				-32.23127365112305,
+				-32.23126983642578,
 				0.0
 			],
 			"scl": [
@@ -766,9 +902,9 @@
 				3.242090542698861e-07
 			],
 			"rot": [
-				67.11212158203125,
-				89.99988555908203,
-				89.99989318847656
+				67.11211395263672,
+				89.9998779296875,
+				89.99988555908203
 			],
 			"scl": [
 				0.9999997019767761,
