@@ -1,9 +1,12 @@
+<img src="https://pyweek.org/static/pyweek-new.png" align="right" width="200"/>
+
 # PyWeek34: Planete Encore
 
 ## Game entry for the PyWeek 34
 
 Game prototype for the [PyWeek 34](https://pyweek.org/) game jam. Made with [HARFANG 3D](https://www.harfang3d.com).<br>
-Tribute to Jean `Moebius` Giraud.
+Tribute to Jean `Moebius` Giraud.<br>
+_Planete Encore_ is implemented in [Python](https://www.python.org/) :snake:<br>
 
 The theme of PyWeek 34 was `Red Planet`, a very inspiring theme that almost quickly directed me toward the universe of Jean `Moebius` Giraud, the French genius of fantasy & sci-fo graphic novels:
 
